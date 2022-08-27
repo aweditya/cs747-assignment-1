@@ -62,6 +62,44 @@ class Eps_Greedy(Algorithm):
 
 # START EDITING HERE
 # You can use this space to define any helper functions that you need
+def kl(p, q):
+    kl_div = np.zeros(np.shape(p))
+    zeros = np.where(p == 0)
+    ones = np.where(p == 1)
+    others = np.flatnonzero(~np.in1d(p, [0, 1]))
+
+    kl_div[zeros] = -np.log(1 - q[zeros])
+    kl_div[ones] = -np.log(q[ones])
+    kl_div[others] = p[others] * np.log(p[others] / q[others]) + \
+        (1 - p[others]) * np.log((1 - p[others]) / (1 - q[others]))
+
+    # if p == 0:
+    #     return -math.log(1 - q)
+    # elif p == 1:
+    #     return -math.log(q)
+    # else:
+    #     return p * math.log(p / q) + (1 - p) * math.log((1 - p)/(1 - q))
+    return kl_div
+
+def compute_kl_ucb(counts, values, t, c=3, N=5, tol=1e-3):
+    iter = 0
+
+    lo = np.copy(values)
+    hi = np.ones(np.shape(values))
+
+    f = np.ones(np.shape(values))
+    kl_ucbs = np.zeros(np.shape(values))
+    while (iter < N and np.abs(f).any() > tol):
+        kl_ucbs = (lo + hi) / 2
+        f = counts * kl(values, kl_ucbs) - math.log(t) - c * math.log(math.log(t))
+        above = np.where(f > 0)
+        below = np.where(f <= 0)
+        lo[below] = kl_ucbs[below]
+        hi[above] = kl_ucbs[above]
+
+        iter += 1
+
+    return kl_ucbs
 # END EDITING HERE
 
 class UCB(Algorithm):
@@ -108,16 +146,37 @@ class KL_UCB(Algorithm):
         super().__init__(num_arms, horizon)
         # You can add any other variables you need here
         # START EDITING HERE
+        self.t = 0
+
+        self.counts = np.zeros(num_arms)
+        self.values = np.zeros(num_arms)
+        self.kl_ucbs = np.zeros(num_arms)
         # END EDITING HERE
     
     def give_pull(self):
         # START EDITING HERE
-        return 0
+        if self.t < self.num_arms:
+            # First pull every arm once so that quantities are well-defined
+            return self.t
+        else:
+            # Select arm that maximises UCB with random tie-breaking
+            return np.argmax(self.kl_ucbs)
+            # return np.random.choice(np.flatnonzero(self.kl_ucbs == np.max(self.kl_ucbs)))
         # END EDITING HERE
     
     def get_reward(self, arm_index, reward):
         # START EDITING HERE
-        pass
+        self.counts[arm_index] += 1
+        n = self.counts[arm_index]
+        value = self.values[arm_index]
+        new_value = ((n - 1) / n) * value + (1 / n) * reward
+        self.values[arm_index] = new_value
+
+        # Only update KL-UCB after all arms have been sampled exactly once
+        if self.t >= self.num_arms:
+            self.kl_ucbs = compute_kl_ucb(self.counts, self.values, self.t)
+
+        self.t += 1 # Increment global time since start of the algorithm 
         # END EDITING HERE
 
 
