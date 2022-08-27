@@ -130,14 +130,20 @@ class Thompson_Sampling(Algorithm):
         super().__init__(num_arms, horizon)
         # You can add any other variables you need here
         # START EDITING HERE
+        self.successes = np.zeros(num_arms)
+        self.failures = np.zeros(num_arms)
         # END EDITING HERE
     
     def give_pull(self):
         # START EDITING HERE
-        return 0
+        x = np.random.beta(self.successes + 1, self.failures + 1)
+        return np.random.choice(np.flatnonzero(x == np.max(x)))
         # END EDITING HERE
     
     def get_reward(self, arm_index, reward):
         # START EDITING HERE
+        # Depending on reward, either increment successes or failures by 1
+        self.successes[arm_index] += reward
+        self.failures[arm_index] += (1 - reward)
         pass
         # END EDITING HERE
