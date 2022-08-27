@@ -70,7 +70,6 @@ class UCB(Algorithm):
         # You can add any other variables you need here
         # START EDITING HERE
         self.t = 0
-        self.init_arm_pull = 0
 
         self.counts = np.zeros(num_arms)
         self.values = np.zeros(num_arms)
@@ -79,10 +78,9 @@ class UCB(Algorithm):
     
     def give_pull(self):
         # START EDITING HERE
-        if self.init_arm_pull < self.num_arms:
+        if self.t < self.num_arms:
             # First pull every arm once so that quantities are well-defined
-            self.init_arm_pull += 1
-            return (self.init_arm_pull - 1)
+            return self.t
         else:
             # Select arm that maximises UCB with random tie-breaking
             return np.argmax(self.ucbs)
@@ -91,7 +89,6 @@ class UCB(Algorithm):
     
     def get_reward(self, arm_index, reward):
         # START EDITING HERE
-        self.t += 1 # Increment global time since start of the algorithm
         self.counts[arm_index] += 1
         n = self.counts[arm_index]
         value = self.values[arm_index]
@@ -99,9 +96,11 @@ class UCB(Algorithm):
         self.values[arm_index] = new_value
 
         # Only update UCB after all arms have been sampled exactly once
-        if self.init_arm_pull == self.num_arms:
+        if self.t >= self.num_arms:
             self.ucbs = self.values + np.sqrt(2 * math.log(self.t) / self.counts)
-            self.ucbs[arm_index] += (new_value - self.values[arm_index])
+            self.ucbs[arm_index] += (new_value - self.values[arm_index])   
+
+        self.t += 1 # Increment global time since start of the algorithm 
         # END EDITING HERE
 
 class KL_UCB(Algorithm):
