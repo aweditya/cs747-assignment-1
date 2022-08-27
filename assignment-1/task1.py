@@ -86,8 +86,8 @@ class UCB(Algorithm):
             return (self.init_arm_pull - 1)
         else:
             # Select arm that maximises UCB with random tie-breaking
-            return np.random.choice(np.flatnonzero(self.ucbs == np.max(self.ucbs)))
-
+            return np.argmax(self.ucbs)
+            # return np.random.choice(np.flatnonzero(self.ucbs == np.max(self.ucbs)))
         # END EDITING HERE
     
     def get_reward(self, arm_index, reward):
@@ -103,8 +103,6 @@ class UCB(Algorithm):
         if self.init_arm_pull == self.num_arms:
             self.ucbs = self.values + np.sqrt(2 * math.log(self.t) / self.counts)
             self.ucbs[arm_index] += (new_value - self.values[arm_index])
-
-        pass
         # END EDITING HERE
 
 class KL_UCB(Algorithm):
@@ -137,7 +135,8 @@ class Thompson_Sampling(Algorithm):
     def give_pull(self):
         # START EDITING HERE
         x = np.random.beta(self.successes + 1, self.failures + 1)
-        return np.random.choice(np.flatnonzero(x == np.max(x)))
+        return np.argmax(x)
+        # return np.random.choice(np.flatnonzero(x == np.max(x)))
         # END EDITING HERE
     
     def get_reward(self, arm_index, reward):
