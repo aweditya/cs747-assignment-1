@@ -70,7 +70,6 @@ class UCB(Algorithm):
         # You can add any other variables you need here
         # START EDITING HERE
         self.t = 0
-        self.num_arms = num_arms
         self.init_arm_pull = 0
 
         self.counts = np.zeros(num_arms)
