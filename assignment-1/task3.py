@@ -26,20 +26,27 @@ import numpy as np
 
 class AlgorithmManyArms:
     def __init__(self, num_arms, horizon):
+        self.k = int(np.sqrt(num_arms))
+
         self.num_arms = num_arms
-        self.beliefs = 1 / num_arms * np.ones((num_arms, num_arms))
+        arms = np.arange(0, num_arms)
+        np.random.shuffle(arms)
+        self.arms = arms[0:self.k]
+
+        self.successes = np.zeros(self.k)
+        self.failures = np.zeros(self.k)
         # Horizon is same as number of arms
     
     def give_pull(self):
         # START EDITING HERE
-        return np.argmax(np.max(self.beliefs, axis=1))
+        x = np.random.beta(self.successes + 1, self.failures + 1)
+        return self.arms[np.argmax(x)]
         # END EDITING HERE
     
     def get_reward(self, arm_index, reward):
         # START EDITING HERE
-        arms = np.arange(0, self.num_arms)
-        if reward == 0:
-            self.beliefs[arm_index] = (arms * self.beliefs[arm_index]) / (np.sum(arms * self.beliefs[arm_index]))
-        else:
-            self.beliefs[arm_index] = ((self.num_arms - arms) * self.beliefs[arm_index]) / (np.sum((self.num_arms - arms) * self.beliefs[arm_index]))
+        for arm in range(self.k):
+            if arm_index == self.arms[arm]:
+                self.successes[arm] += reward
+                self.failures[arm] += (1 - reward)
         # END EDITING HERE
