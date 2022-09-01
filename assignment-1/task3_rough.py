@@ -27,28 +27,19 @@ import numpy as np
 class AlgorithmManyArms:
     def __init__(self, num_arms, horizon):
         self.num_arms = num_arms
-        self.counts = np.zeros(num_arms)
-
-        self.eps = 0.7
-        self.prev_pull = 0
-        self.prev_reward = 0
+        self.beliefs = 1 / num_arms * np.ones((num_arms, num_arms))
         # Horizon is same as number of arms
     
     def give_pull(self):
         # START EDITING HERE
-        if self.prev_reward == 1:
-            return self.prev_pull
-        else:
-            if np.random.random() < self.eps:
-                return np.random.randint(self.num_arms)
-            else:
-                return np.argmax(self.counts)
+        return np.argmax(np.max(self.beliefs, axis=1))
         # END EDITING HERE
     
     def get_reward(self, arm_index, reward):
         # START EDITING HERE
-        self.counts[arm_index] += reward
-
-        self.prev_pull = arm_index
-        self.prev_reward = reward
+        arms = np.arange(0, self.num_arms)
+        if reward == 0:
+            self.beliefs[arm_index] = (arms * self.beliefs[arm_index]) / (np.sum(arms * self.beliefs[arm_index]))
+        else:
+            self.beliefs[arm_index] = ((self.num_arms - arms) * self.beliefs[arm_index]) / (np.sum((self.num_arms - arms) * self.beliefs[arm_index]))
         # END EDITING HERE
