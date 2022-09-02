@@ -33,6 +33,10 @@ class AlgorithmManyArms:
         np.random.shuffle(arms)
         self.arms = arms[0:self.k]
 
+        self.mapping = dict()
+        for index in range(self.num_arms):
+            self.mapping[arms[index]] = index
+
         self.successes = np.zeros(self.k)
         self.failures = np.zeros(self.k)
         # Horizon is same as number of arms
@@ -45,8 +49,6 @@ class AlgorithmManyArms:
     
     def get_reward(self, arm_index, reward):
         # START EDITING HERE
-        for arm in range(self.k):
-            if arm_index == self.arms[arm]:
-                self.successes[arm] += reward
-                self.failures[arm] += (1 - reward)
+        self.successes[self.mapping[arm_index]] += reward
+        self.failures[self.mapping[arm_index]] += (1 - reward)
         # END EDITING HERE
