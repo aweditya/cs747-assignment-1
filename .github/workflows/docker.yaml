@@ -1,0 +1,19 @@
+name: Autograder
+
+on: [push]
+
+jobs:
+  Autograder:
+
+    runs-on: ubuntu-latest
+    container:
+      image: sankalpme/cs747
+      volumes:
+        - my_docker_volume:/volume_mount
+      options: --cpus 1
+    steps:
+      - uses: actions/checkout@v3
+      - name: Grade
+        run: |
+          cd assignment-1
+          python3 autograder.py --task all
