@@ -1,0 +1,3 @@
+https://stackoverflow.com/questions/42071597/numpy-argmax-random-tie-breaking
+https://math.iitm.ac.in/public_html/sryedida/caimna/transcendental/bracketing%20methods/bisection/bisection.html
+https://stackoverflow.com/questions/52417929/remove-elements-from-one-array-if-present-in-another-array-keep-duplicates-nu
