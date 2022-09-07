@@ -63,15 +63,18 @@ class Eps_Greedy(Algorithm):
 # START EDITING HERE
 # You can use this space to define any helper functions that you need
 def kl(p, q):
-    kl_div = np.zeros(np.shape(p))
-    zeros = np.where(p == 0)
-    ones = np.where(p == 1)
-    others = np.flatnonzero(~np.in1d(p, [0, 1]))
+    # kl_div = np.zeros(np.shape(p))
+    # zeros = np.where(p == 0)
+    # ones = np.where(p == 1)
+    # others = np.flatnonzero(~np.in1d(p, [0, 1]))
 
-    kl_div[zeros] = -np.log(1 - q[zeros])
-    kl_div[ones] = -np.log(q[ones])
-    kl_div[others] = p[others] * np.log(p[others] / q[others]) + \
-        (1 - p[others]) * np.log((1 - p[others]) / (1 - q[others]))
+    # kl_div[zeros] = -np.log(1 - q[zeros])
+    # kl_div[ones] = -np.log(q[ones])
+    # kl_div[others] = p[others] * np.log(p[others] / q[others]) + \
+    #     (1 - p[others]) * np.log((1 - p[others]) / (1 - q[others]))
+
+    tol = 1e-9
+    kl_div = p * np.log((p / q) + tol) + (1 - p) * np.log((1 - p) / (1 - q) + tol)
 
     # if p == 0:
     #     return -math.log(1 - q)
@@ -85,7 +88,7 @@ def compute_kl_ucb(counts, values, t, c=3, N=5, tol=1e-3):
     iter = 0
 
     lo = np.copy(values)
-    hi = np.ones(np.shape(values))
+    hi = np.ones(np.shape(values)) - 1e-9
 
     f = np.ones(np.shape(values))
     kl_ucbs = np.zeros(np.shape(values))
